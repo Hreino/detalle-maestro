@@ -1,0 +1,211 @@
+﻿@model PruebaDetalleMaestro.Models.Encabezado
+@using PruebaDetalleMaestro.Models;
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Encabezado</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.id, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.id, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.id, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Cliente, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Cliente, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Cliente, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Fecha, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Fecha, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Fecha, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <hr />
+    <!--Inicio del detalle Maestro-->
+
+    <div class="row">
+        <h3 class="text-center">Detalles </h3>
+        <div class="col-md-2">
+            <input type="number" id="cant" class="form-control" placeholder="Cantidad" />     <!-- Input de cantidad -->
+
+        </div>
+
+
+        <div class="col-lg-10 col-xs-10">
+            <div class="form-inline col-lg-10 col-xs-10">
+                <input type="text" id="txtProducto" style="width:73%" placeholder="Seleccione un producto" class="form-control" disabled /> <!-- Input de nombre del producto -->
+                <button type="button" class="btn btn-default glyphicon glyphicon-search" data-toggle="modal" data-target="#exampleModal"></button> <!-- Boton para activar el modal -->
+                <button type="button" id="addDetalle" class="btn btn-success glyphicon glyphicon-plus"></button> <!-- Boton para agregar el detalle con la cantidad a la vista -->
+            </div>
+        </div>
+
+    </div>
+
+
+
+    @{
+
+        // se recibe la lista de productos
+        IEnumerable<PruebaDetalleMaestro.Models.Producto> ProductList = new List<PruebaDetalleMaestro.Models.Producto>();
+        ProductList = ViewBag.ProductsList;
+    }
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Productos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tr>
+                            <th>
+                                Producto
+                            </th>
+                            <th>
+                                Precio
+                            </th>
+                            <th></th>
+                        </tr>
+
+                        @foreach (var item in ProductList)
+                        {
+
+                            //Se despliega la lista de productos
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Precio)
+                                </td>
+                                <td>
+
+                                    <button type="button"
+                                            class="btn btn-warning"
+                                            id="addProduct"
+                                            onclick="addProdDetail(@item.idProducto, '@item.Nombre', @item.Precio)"
+                                            data-dismiss="modal">
+                                        Agregar
+                                    </button>
+
+                                </td>
+                            </tr>
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fin del  Modal -->
+
+
+    <hr />
+
+    <div id="detalles">
+        <!-- Cargando la vista Parcial -->
+        @{
+            Html.RenderPartial("DetallesCrear");
+
+        }
+        <!-- Cargando la vista Parcial -->
+
+    </div>
+
+
+    <!--Fin del detalle Maestro-->
+
+
+
+    <!--Boton de guardar-->
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </div>
+
+    <!--Boton de guardar-->
+
+</div>
+            }
+    <hr />
+
+<script>
+    $(document).ready(iniciar);
+
+    var dataDetail = { id: 0, producto: "", precio: 0, cantidad: 0 };       // Se inicializa un objeto con los detalles que debe incluir el Maestro Detalle
+
+
+    function iniciar() {
+        $("#addDetalle").click(addDetail); //Se llama a la funcion de agregar detalle
+    }
+
+    function addDetail() {
+        dataDetail.cantidad = $("#cant").val(); //se asigna la cantidad al objeto que se ha creado
+
+        //realizar la peticion ajax
+
+        $.ajax({
+            method: "Post",
+            url: "/Encabezadoes/DetallesCrear", //Controlador/Metodo
+            data: {
+                idProducto: dataDetail.id, //Parametro que recibe el controlador 
+                cantidad: dataDetail.cantidad //Parametro que recibe el controlador
+            },
+            success: function (data) {
+                $("#detalles").html(data); //Se carga la vista parcial en el div 
+            },
+            error: function () { }
+
+
+        });
+    }
+
+    function addProdDetail(id, nombre, precio) { // relacionado con el modal 
+       //asignando los valores al producto
+        dataDetail.id = id;  //usando el mismo objeto que se declara al inicio
+        dataDetail.producto = nombre; //usando el mismo objeto que se declara al inicio
+        dataDetail.precio = precio; //usando el mismo objeto que se declara al inicio
+
+        $("#txtProducto").val(nombre); //agregando el nombre al input del producto
+    }
+</script>
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

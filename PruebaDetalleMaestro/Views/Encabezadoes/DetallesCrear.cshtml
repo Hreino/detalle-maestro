@@ -1,0 +1,29 @@
+﻿@model ICollection<PruebaDetalleMaestro.Models.DetalleEncabezado>
+
+<!--Importando el modelo del detalle maestro-->
+
+<table class="table table-bordered table-hover table-responsive">
+    <thead>
+        <tr class="info">
+            <th> Cantidad</th>
+            <th> Producto</th>
+            <th> Precio</th>
+            <th> Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td> @item.Cantidad</td>
+                    <td> @item.Producto.Nombre</td>
+                    <td> @item.Producto.Precio</td>
+                    <td> @item.Total</td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
